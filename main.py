@@ -441,35 +441,62 @@ def add_new_battleship(player_1_ship_list, battleships_player_1):
 def auto_place_ships(ship_list, battleships):
     """TODO"""
 
+
+    surrounding_cells = []
+
+
     for ship_type, ship_properties in battleships.items():
 
-        try:
-
-            while True:
         
 
-                print(ship_type)
+        while True:
+    
 
-                random_orientation = random.choice(["horizontal", "vertical"])
+            print(ship_type)
 
-                random_coord = random.choice(grid_numbers) + random.choice(grid_letters)
+            random_orientation = random.choice(["horizontal", "vertical"])
 
-                ship_len = len(ship_properties)
+            random_coord = random.choice(grid_numbers) + random.choice(grid_letters)
+
+            ship_len = len(ship_properties)
+
+            try:
 
                 auto_ship = get_auto_coordinates(random_orientation, random_coord, ship_len)
 
+                for i in auto_ship:
+                    if i in surrounding_cells:
+                        raise ValueError
+                    
+                surrounding_cells += get_surrounding_cells(auto_ship)
 
-                print(random_orientation)
-                print(random_coord)
-                print(auto_ship)
+
+
+                for key in ship_properties:
+                    # Присвоюємо відповідне значення з list_1 для кожного індексу
+                    ship_properties[key] = [int(auto_ship[key-1][0]), auto_ship[key-1][1], True]
 
                 break
 
+            
+            except Exception:
+                print(f"{RED}________________ERROR___________________{RESET}")
+
+
+    player_1_ship_list = convert_ship_dict_to_field_list(battleships, ship_list)
+
+    drow_display(battleships, player_1_ship_list)
+
+  
+    print(battleships)
 
 
 
-        except Exception:
-            print(f"{RED}________________ERROR___________________{RESET}")
+
+
+
+
+
 
 
 

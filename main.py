@@ -108,7 +108,7 @@ def get_ship_visual(ship_properties: dict, ship_decks: int) -> str:
     """
     ship_length = len(ship_properties)
 
-    # Create the initial ship template: all positions are unfilled ("_")
+    # Create the initial ship template: all positions are unfilled "_"
     ship_visual = ["_"] * ship_length
 
     # Replace the current deck with "?"
@@ -127,48 +127,82 @@ def get_ship_visual(ship_properties: dict, ship_decks: int) -> str:
 
 def convert_ship_dict_to_field_list(ship_dict: dict, ship_list: list) -> list:
     """
-    TODO
+    Fills the list of cells on the field with ships' positions for visualization
+
+    This function takes information about the ships' positions from the
+    dictionary and marks the cells on the field as either "O" (for ship
+    presence) or "X" (for hit ships).
+
+    Parameters:
+    ship_dict : dict - A dictionary containing information about the ships'
+        positions. Each ship type has its own list of positions, which includes
+        row, column, and whether it has been hit.
+    
+    ship_list : list - A 2D list representing the game field, where each cell is
+        either empty or occupied by a ship.
+
+    Returns:
+    list - The updated game field with ships marked as either "O" or "X".
     """
     for ship_type, ship_properties in ship_dict.items():
         for ship_decks, desk_properties in ship_properties.items():
+
+            # Skip if there is no deck information available
             if desk_properties[1] == False:
                 continue
 
-            row = grid_letters.index(desk_properties[1])  # Отримуємо індекс рядка
-            col = grid_numbers.index(str(desk_properties[0]))  # Отримуємо індекс колонки
-            
-            ship_list[row][col] = "O" if desk_properties[2] else "X"  # Позначаємо корабель
+            # Get the index of the row and column
+            row = grid_letters.index(desk_properties[1])  
+            col = grid_numbers.index(str(desk_properties[0]))
+            # Mark the cell with "O" for an unhit ship or "X" for a hit ship
+            ship_list[row][col] = "O" if desk_properties[2] else "X"  
 
     return ship_list
 
 
 def get_surrounding_cells(ship: list) -> list:
     """
-    TODO
+    This function creates a list of cells around the given ship. 
+
+    The function considers all the cells around each deck of the ship (including
+    diagonals).
+
+    Parameters:
+    ship : list - A list of coordinates representing the positions of the ship's
+        decks. Each deck is a tuple of (column, row).
+
+    Returns:
+    list - A list of coordinates of the cells around the ship (adjacent cells).
     """
     surrounding_cells = []
 
+    # Loop through each deck of the ship
     for coord_cell in ship:
 
-
+        # Check all the adjacent cells (delta = -1, 0, 1 for row and column)
         for i in range(-1,2):
             for j in range(-1,2):
 
-                coord_row = grid_letters.index(coord_cell[1])  # Отримуємо індекс рядка
-                coord_col = grid_numbers.index(str(coord_cell[0]))  # Отримуємо індекс колонки
+                # Get the row and column index of the current deck
+                coord_row = grid_letters.index(coord_cell[1])
+                coord_col = grid_numbers.index(str(coord_cell[0]))
 
                 new_coord_row = coord_row + i
                 new_coord_col = coord_col + j
 
-                if not (
-                    new_coord_row >= 0 and new_coord_row < 10
-                    ) and (
-                        new_coord_col >= 0 and new_coord_col < 10
-                        ):
+                # Check if the new coordinates are within the field limits
+                if not (0 <= new_coord_row < 10 and 0 <= new_coord_col < 10):
+
                     continue
 
-                new_coord = grid_numbers[new_coord_col] + grid_letters[new_coord_row]
+                # Convert the new coordinates back to our coordinate format
+                new_coord = grid_numbers[
+                    new_coord_col
+                    ] + grid_letters[
+                        new_coord_row
+                        ]
 
+                # Add the new coordinate to the list if it isn't already there
                 if new_coord not in surrounding_cells:
                     surrounding_cells.append(new_coord)
 
@@ -177,11 +211,26 @@ def get_surrounding_cells(ship: list) -> list:
 
 def r(ship_properties: dict) -> str:
     """
-    TODO
+    This function creates a representation of a ship on the board. 
+        - If a deck is destroyed or its coordinates are not set, it is marked
+            with "X".
+        - If a deck exists with defined coordinates, it is marked with "O".
+
+    Parameters:
+    ship_properties : dict - A dictionary containing information about the
+        ship's decks. Each deck's properties include condition.
+
+    Returns:
+    str - A string representing the ship with "X" for destroyed or undefined
+        decks, and "O" for existing decks with defined coordinates.
     """
+    # Create the ship's representation
     ship = ""
 
     for ship_decks, desk_properties in ship_properties.items():
+
+        # Check if the deck is destroyed (False) or undefined
+        # and set the appropriate symbol
         if desk_properties[2] == False:
             ship += "X"
         else:
@@ -190,18 +239,35 @@ def r(ship_properties: dict) -> str:
     return ship
 
 
-def get_ship_set(ship_coords: list, new_coord: str) -> tuple[set[str], set[str]]:
+def get_ship_set(
+                ship_coords: list,
+                new_coord: str
+                ) -> tuple[set[str], set[str]]:
     """
-    TODO
+    Returns two sets containing the row and column numbers of the ship's
+    coordinates for further checks.
+
+    Parameters:
+    ship_coords : list - A list of tuples representing the ship's current
+        coordinates.
+    new_coord : str - A string representing the new coordinate to be added to
+        the ship's position.
+
+    Returns:
+    tuple : A tuple containing two sets:
+        - The first set contains all the column numbers (as strings)
+        - The second set contains all the row numbers (as strings)
     """
+    # Create empty sets for rows and columns
     col_sets = set()
     row_sets = set()
     
+    # Add the coordinates of the existing ship's decks to the sets
     for ship_decks in ship_coords:
         col_sets.add(ship_decks[0])
         row_sets.add(ship_decks[1])
 
-    
+    # Add the new deck's coordinates to the sets
     col_sets.add(new_coord[0])
     row_sets.add(new_coord[1])
 
@@ -210,23 +276,42 @@ def get_ship_set(ship_coords: list, new_coord: str) -> tuple[set[str], set[str]]
 
 def is_adjacent_coordinates(ship_coords: list, new_coord: str) -> bool:
     """
-    TODO
+    Checks if the given coordinate is adjacent to the last entered coordinate.
+
+    This function compares the last deck's coordinates with the new coordinate
+    to ensure they are adjacent to each other on the grid. It checks if the new
+    coordinate is directly next to the last one.
+
+    TODO: The function should be extended to handle cases where the new
+    coordinate is on the opposite side of the ship
+
+    Parameters:
+    ship_coords : list - A list representing the coordinates of the ship's decks
+    new_coord : str - A string representing the new coordinate to be checked
+
+    Returns:
+    bool - True if the new coordinate is adjacent to the last entered
+        coordinate, otherwise False.
     """
+    # If there are no coordinates yet, the first coordinate is always valid
     if not ship_coords:
-        return True # Перша координата завжди правильна
+        return True 
     
-    col_sets, row_sets = get_ship_set(ship_coords, new_coord)
+    # col_sets, row_sets = get_ship_set(ship_coords, new_coord)
+    # first_col, first_row = ship_coords[0]
 
-
-    first_col, first_row = ship_coords[0]
+    # Get the last coordinate of the ship and the new coordinate
     last_col, last_row = ship_coords[-1]
     new_col, new_row = new_coord
 
+    # Find the index of the columns and rows in the grid
     idx_last_col = grid_numbers.index(last_col)
     idx_last_row = grid_letters.index(last_row)
     idx_new_col = grid_numbers.index(new_col)
     idx_new_row = grid_letters.index(new_row)
 
+    # Check if the new coordinate is adjacent to the last one
+    # sum of index differences should be 1
     if abs(idx_last_col - idx_new_col) + abs(idx_last_row - idx_new_row) == 1:
         return True
     else:
@@ -235,50 +320,61 @@ def is_adjacent_coordinates(ship_coords: list, new_coord: str) -> bool:
 
 def is_ship_in_straight_line(ship_coords: list, new_coord: str) -> bool:
     """
-    TODO
-    """
+    Checks if the new coordinate forms a straight line with the already entered
+    ship coordinates.
 
+    This function verifies whether the coordinates of the ship are aligned
+    either horizontally (same row) or vertically (same column), forming
+    a straight line.
+
+    Parameters:
+    ship_coords : list - A list the coordinates of the ship's already placed
+        decks.
+    new_coord : str - A string representing the new coordinate to be checked.
+
+    Returns:
+    bool - True if the new coordinate forms a straight line with the existing
+        coordinates (either horizontally or vertically), otherwise False.
+    """
+    # If there are no coordinates yet, the first coordinate is always valid
     if not ship_coords:
-        return True # Перша координата завжди правильна
+        return True
     
+    # Get the sets of column and row coordinates
     col_sets, row_sets = get_ship_set(ship_coords, new_coord)
     
+    # Check if the ship coordinates form a straight line
+    # Either all columns are the same or all rows are the same
     if (
         len(col_sets) == 1 and len(row_sets) != 1
         ) or (
             len(col_sets) != 1 and len(row_sets) == 1
             ):
-        print("len(col_sets) ", len(col_sets))
-        print("len(row_sets) ", len(row_sets))
         return True
 
     return False
 
 
-def drow_full_display(d1: dict, l1: list) -> None:
+def drow_full_display(d1: dict, l1: list, d2: dict, l2: list) -> None:
     """
     TODO
     """
-    X = "X"
-    XX = "0X"
-    XXX = "X0X"
-    XXXX = "X0XX"
 
     print(
         f"""
        Your field                                             Opponent's field                     
    0 1 2 3 4 5 6 7 8 9                                        0 1 2 3 4 5 6 7 8 9
  +---------------------+                                    +---------------------+  
-a| {l1[0][0]} {l1[0][1]} {l1[0][2]} {l1[0][3]} {l1[0][4]} {l1[0][5]} {l1[0][6]} {l1[0][7]} {l1[0][8]} {l1[0][9]} |  BB - {r(d1["BB1"])}                        a| ~ ~ ~ ~ ~ ~ ~ * ~ ~ |  BB - {XXXX}
-b| {l1[1][0]} {l1[1][1]} {l1[1][2]} {l1[1][3]} {l1[1][4]} {l1[1][5]} {l1[1][6]} {l1[1][7]} {l1[1][8]} {l1[1][9]} |                                   b| ~ ~ ~ X X X ~ ~ ~ ~ |  
-c| {l1[2][0]} {l1[2][1]} {l1[2][2]} {l1[2][3]} {l1[2][4]} {l1[2][5]} {l1[2][6]} {l1[2][7]} {l1[2][8]} {l1[2][9]} |  CA - {r(d1["CA1"])} - {r(d1["CA2"])}                   c| ~ ~ ~ ~ * ~ ~ ~ ~ ~ |  CA - {XXX} - {XXX}
-d| {l1[3][0]} {l1[3][1]} {l1[3][2]} {l1[3][3]} {l1[3][4]} {l1[3][5]} {l1[3][6]} {l1[3][7]} {l1[3][8]} {l1[3][9]} |                                   d| ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ |
-e| {l1[4][0]} {l1[4][1]} {l1[4][2]} {l1[4][3]} {l1[4][4]} {l1[4][5]} {l1[4][6]} {l1[4][7]} {l1[4][8]} {l1[4][9]} |  SS - {r(d1["SS1"])} - {r(d1["SS2"])} - {r(d1["SS3"])}                e| ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ |  SS - {XX} - {XX} - {XX}
-f| {l1[5][0]} {l1[5][1]} {l1[5][2]} {l1[5][3]} {l1[5][4]} {l1[5][5]} {l1[5][6]} {l1[5][7]} {l1[5][8]} {l1[5][9]} |                                   f| ~ ~ ~ ~ ~ ~ ~ * * ~ |
-g| {l1[6][0]} {l1[6][1]} {l1[6][2]} {l1[6][3]} {l1[6][4]} {l1[6][5]} {l1[6][6]} {l1[6][7]} {l1[6][8]} {l1[6][9]} |  PB - {r(d1["PB1"])} - {r(d1["PB2"])} - {r(d1["PB3"])} - {r(d1["PB4"])}               g| ~ ~ X ~ ~ ~ ~ ~ ~ ~ |  PB - {X} - {X} - {X} - {X}
-h| {l1[7][0]} {l1[7][1]} {l1[7][2]} {l1[7][3]} {l1[7][4]} {l1[7][5]} {l1[7][6]} {l1[7][7]} {l1[7][8]} {l1[7][9]} |                                   h| ~ ~ X * ~ ~ ~ ~ ~ ~ |
-i| {l1[8][0]} {l1[8][1]} {l1[8][2]} {l1[8][3]} {l1[8][4]} {l1[8][5]} {l1[8][6]} {l1[8][7]} {l1[8][8]} {l1[8][9]} |                                   i| ~ ~ ~ * ~ ~ ~ ~ X ~ |
-j| {l1[9][0]} {l1[9][1]} {l1[9][2]} {l1[9][3]} {l1[9][4]} {l1[9][5]} {l1[9][6]} {l1[9][7]} {l1[9][8]} {l1[9][9]} |                                   j| ~ ~ ~ * ~ ~ ~ ~ ~ ~ |
+a| {l1[0][0]} {l1[0][1]} {l1[0][2]} {l1[0][3]} {l1[0][4]} {l1[0][5]} {l1[0][6]} {l1[0][7]} {l1[0][8]} {l1[0][9]} |  BB - {r(d1["BB1"])}                        a| {l2[0][0]} {l2[0][1]} {l2[0][2]} {l2[0][3]} {l2[0][4]} {l2[0][5]} {l2[0][6]} {l2[0][7]} {l2[0][8]} {l2[0][9]} |  BB - {r(d2["BB1"])}
+b| {l1[1][0]} {l1[1][1]} {l1[1][2]} {l1[1][3]} {l1[1][4]} {l1[1][5]} {l1[1][6]} {l1[1][7]} {l1[1][8]} {l1[1][9]} |                                   b| {l2[1][0]} {l2[1][1]} {l2[1][2]} {l2[1][3]} {l2[1][4]} {l2[1][5]} {l2[1][6]} {l2[1][7]} {l2[1][8]} {l2[1][9]} |  
+c| {l1[2][0]} {l1[2][1]} {l1[2][2]} {l1[2][3]} {l1[2][4]} {l1[2][5]} {l1[2][6]} {l1[2][7]} {l1[2][8]} {l1[2][9]} |  CA - {r(d1["CA1"])} - {r(d1["CA2"])}                   c| {l2[2][0]} {l2[2][1]} {l2[2][2]} {l2[2][3]} {l2[2][4]} {l2[2][5]} {l2[2][6]} {l2[2][7]} {l2[2][8]} {l2[2][9]} |  CA - {r(d2["CA1"])} - {r(d2["CA2"])}
+d| {l1[3][0]} {l1[3][1]} {l1[3][2]} {l1[3][3]} {l1[3][4]} {l1[3][5]} {l1[3][6]} {l1[3][7]} {l1[3][8]} {l1[3][9]} |                                   d| {l2[3][0]} {l2[3][1]} {l2[3][2]} {l2[3][3]} {l2[3][4]} {l2[3][5]} {l2[3][6]} {l2[3][7]} {l2[3][8]} {l2[3][9]} |
+e| {l1[4][0]} {l1[4][1]} {l1[4][2]} {l1[4][3]} {l1[4][4]} {l1[4][5]} {l1[4][6]} {l1[4][7]} {l1[4][8]} {l1[4][9]} |  SS - {r(d1["SS1"])} - {r(d1["SS2"])} - {r(d1["SS3"])}                e| {l2[4][0]} {l2[4][1]} {l2[4][2]} {l2[4][3]} {l2[4][4]} {l2[4][5]} {l2[4][6]} {l2[4][7]} {l2[4][8]} {l2[4][9]} |  SS - {r(d2["SS1"])} - {r(d2["SS2"])} - {r(d2["SS3"])}
+f| {l1[5][0]} {l1[5][1]} {l1[5][2]} {l1[5][3]} {l1[5][4]} {l1[5][5]} {l1[5][6]} {l1[5][7]} {l1[5][8]} {l1[5][9]} |                                   f| {l2[5][0]} {l2[5][1]} {l2[5][2]} {l2[5][3]} {l2[5][4]} {l2[5][5]} {l2[5][6]} {l2[5][7]} {l2[5][8]} {l2[5][9]} |
+g| {l1[6][0]} {l1[6][1]} {l1[6][2]} {l1[6][3]} {l1[6][4]} {l1[6][5]} {l1[6][6]} {l1[6][7]} {l1[6][8]} {l1[6][9]} |  PB - {r(d1["PB1"])} - {r(d1["PB2"])} - {r(d1["PB3"])} - {r(d1["PB4"])}               g| {l2[6][0]} {l2[6][1]} {l2[6][2]} {l2[6][3]} {l2[6][4]} {l2[6][5]} {l2[6][6]} {l2[6][7]} {l2[6][8]} {l2[6][9]} |  PB - {r(d2["PB1"])} - {r(d2["PB2"])} - {r(d2["PB3"])} - {r(d2["PB4"])}
+h| {l1[7][0]} {l1[7][1]} {l1[7][2]} {l1[7][3]} {l1[7][4]} {l1[7][5]} {l1[7][6]} {l1[7][7]} {l1[7][8]} {l1[7][9]} |                                   h| {l2[7][0]} {l2[7][1]} {l2[7][2]} {l2[7][3]} {l2[7][4]} {l2[7][5]} {l2[7][6]} {l2[7][7]} {l2[7][8]} {l2[7][9]} |
+i| {l1[8][0]} {l1[8][1]} {l1[8][2]} {l1[8][3]} {l1[8][4]} {l1[8][5]} {l1[8][6]} {l1[8][7]} {l1[8][8]} {l1[8][9]} |                                   i| {l2[8][0]} {l2[8][1]} {l2[8][2]} {l2[8][3]} {l2[8][4]} {l2[8][5]} {l2[8][6]} {l2[8][7]} {l2[8][8]} {l2[8][9]} |
+j| {l1[9][0]} {l1[9][1]} {l1[9][2]} {l1[9][3]} {l1[9][4]} {l1[9][5]} {l1[9][6]} {l1[9][7]} {l1[9][8]} {l1[9][9]} |                                   j| {l2[9][0]} {l2[9][1]} {l2[9][2]} {l2[9][3]} {l2[9][4]} {l2[9][5]} {l2[9][6]} {l2[9][7]} {l2[9][8]} {l2[9][9]} |
  +---------------------+                                    +---------------------+
                                     Your turn!
 """
@@ -288,8 +384,23 @@ j| {l1[9][0]} {l1[9][1]} {l1[9][2]} {l1[9][3]} {l1[9][4]} {l1[9][5]} {l1[9][6]} 
 
 def drow_players_display(d1: dict, l1: list) -> None:
     """
-    TODO
-    """
+    Displays the player's field during the ship placement phase.
+
+    This function visualizes the game field by filling the provided list with
+    ship positions and displaying the current state of the field. It also shows
+    the status of each ship type based on the provided ship dictionary.
+
+    Parameters:
+    ship_dict : dict - A dictionary containing information about the ships'
+        positions. Each ship has a list of positions and their hit status.
+
+    ship_list : list - A 2D list representing the game field. Each sublist
+        corresponds to a row and contains characters for empty cells or ship
+        positions.
+
+    Returns:
+        None
+    """ 
     print(
         f"""
        Your field                
@@ -312,22 +423,39 @@ j| {l1[9][0]} {l1[9][1]} {l1[9][2]} {l1[9][3]} {l1[9][4]} {l1[9][5]} {l1[9][6]} 
 
 def get_auto_coordinates(orientation: str, coord: str, ship_len: int) -> list:
     """
-    TODO
+    Generates a list of coordinates for a ship placed automatically.
+
+    This function computes a list of coordinates based on the provided starting
+    coordinate, ship length, and orientation (either horizontal or vertical).
+
+    Parameters:
+    orientation : str
+        A string that indicates the ship's orientation:
+        - "horizontal" for horizontal placement.
+        - "vertical" for vertical placement.
+    coord : str - A string representing the starting coordinate of the ship.
+    ship_len : int - The length of the ship, which determines how many cells the
+        ship will occupy.
+
+    Returns: 
+    list : A list of strings, each representing the coordinates of the ship's
+        cells.
     """
     new_ship = []
 
+    # Find the column and row indexes for the given coordinate
     idx_col = grid_numbers.index(coord[0])
     idx_row = grid_letters.index(coord[1])
 
     if orientation == "horizontal":
+        # Row index stays the same, column changes
         delta_row = 1
-
         for i in range(ship_len):
             new_ship.append(
                 grid_numbers[idx_col + i + delta_row]+grid_letters[idx_row]
                 )
     else:
-
+        # Column index stays the same, row changes
         delta_col = 1
         for i in range(ship_len):
             new_ship.append(
@@ -341,7 +469,22 @@ def add_new_battleship(
                     battleships_player_1: dict
                     ) -> None:
     """
-    TODO
+    Prompts the player to place battleships on the field.
+
+    This function allows the player to input the coordinates of each ship's
+    decks, and checks whether the placement is valid according to the game's
+    rules.
+
+    Parameters:
+    player_1_ship_list : list - An empty list representing the player's game
+        field, where the ships will be placed.
+    
+    battleships_player_1 : dict - A dictionary containing the ships' properties,
+        such as type, length, and status.
+    
+    Returns:
+    None - This function updates the `player_1_ship_list` and
+        `battleships_player_1` dictionaries directly.
     """
     blacklist_1 = []
     current_ship = []
@@ -363,37 +506,43 @@ def add_new_battleship(
                 f"Please put your battleships {ship_type[0:2]} ({ship_view}):"
                 ).upper()
 
-
+                    # Validate input length
                     if len(player_input) != 2:
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("The ship's deck coordinate must consist of two characters: a number and a letter.")
                         raise ValueError
 
+                    # Validate column input (first character must be a number)
                     if player_input[0] not in grid_numbers:
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("The first value must be a number between 0 and 9.")
                         raise ValueError
 
+                    # Validate row input (second character must be a letter)
                     if player_input[1] not in grid_letters:
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("The second value must be a letter from 'A' to 'J'.")
                         raise ValueError
 
+                    # Ensure the coordinate is not duplicated
                     if player_input in blacklist_1:
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("The coordinate is duplicated.")
                         raise ValueError
 
+                    # Ensure the new coordinate is adjacent to the current ship
                     if not is_adjacent_coordinates(current_ship, player_input):
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("The entered coordinate is not adjacent to the previous one.")
                         raise ValueError
 
+                    # Ensure the coordinates form a straight line
                     if not is_ship_in_straight_line(current_ship, player_input):
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("The ship's coordinates do not form a straight line")
                         raise ValueError
 
+                    # Ensure the cell is not adjacent to an existing ship
                     if player_input in surrounding_cells:
                         print(f"{RED}____________ERROR_______________{RESET}")
                         print("This cell is adjacent to an existing ship and cannot be selected.")
@@ -406,61 +555,89 @@ def add_new_battleship(
 
                     blacklist_1.append(player_input[0]+player_input[1])
 
+                    # Update the ship's coordinates in the battleship dictionary
                     battleships_player_1[ship_type][ship_decks][0] = int(player_input[0])
                     battleships_player_1[ship_type][ship_decks][1] = player_input[1]
                     battleships_player_1[ship_type][ship_decks][2] = True
 
+                    # Convert the updated dictionary to the game field list
                     player_1_ship_list = convert_ship_dict_to_field_list(
                         battleships_player_1,
                         player_1_ship_list
                         )
 
+                    # Draw the updated field
                     drow_players_display(
                         battleships_player_1,
                         player_1_ship_list
                         )
 
-                    break
+                    break # Exit the loop if no errors
+            
                 except Exception:
                     print(f"{RED}____________ERROR_______________{RESET}")
 
 
 def auto_place_ships(ship_list: list, battleships: dict) -> None:
     """
-    TODO
+    Automatically places battleships on the field without user input.
+
+    This function randomly selects coordinates and orientation (horizontal or
+    vertical) for each ship, ensuring that:
+    - Ships do not overlap.
+    - Ships are not placed adjacent to one another (no contact).
+    - Ships stay within the game grid boundaries.
+
+    Parameters:
+    ship_list : list - The player's game field list that visually represents the
+        current ship layout.
+
+    battleships : dict - A dictionary containing the player's battleships with
+        their properties, such as length and current placement status.
+
+    Returns:
+    None - This function modifies the `ship_list` and `battleships` in-place.
     """
     surrounding_cells = []
 
     for ship_type, ship_properties in battleships.items():
 
         while True:
+            # Random orientation and starting coordinate
             random_orientation = random.choice(["horizontal", "vertical"])
             random_coord = random.choice(grid_numbers) + random.choice(grid_letters)
             ship_len = len(ship_properties)
 
             try:
+                # Generate coordinates for the ship
                 auto_ship = get_auto_coordinates(
                                                 random_orientation,
                                                 random_coord,
                                                 ship_len
                                                 )
+                
+                # Check if any cell is adjacent to existing ships
                 for i in auto_ship:
                     if i in surrounding_cells:
                         raise ValueError
                     
+                # Update the list of surrounding cells
                 surrounding_cells += get_surrounding_cells(auto_ship)
 
+                # Assign coordinates to the ship in the dictionary
                 for key in ship_properties:
-                    # Присвоюємо відповідне значення з list_1 для кожного індексу
                     ship_properties[key] = [
                         int(auto_ship[key-1][0]), auto_ship[key-1][1], True
                         ]
 
+                # Valid ship placed, exit the loop
                 break
 
             except Exception:
+                # Try again if placement is invalid
                 continue
 
+    # Convert ship dictionary to field list for visualization
     player_1_ship_list = convert_ship_dict_to_field_list(battleships, ship_list)
 
     drow_players_display(battleships, player_1_ship_list) # #############################################
@@ -472,9 +649,11 @@ def main():
     """
     while True:
 
-        # add_new_battleship(player_1_ship_list, battleships_player_1)
+        add_new_battleship(player_1_ship_list, battleships_player_1)
 
         auto_place_ships(player_2_ship_list, battleships_player_2)
+
+        drow_full_display(battleships_player_1, player_1_ship_list, battleships_player_2, player_2_ship_list) 
        
         break
  

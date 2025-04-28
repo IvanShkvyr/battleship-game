@@ -31,57 +31,37 @@ import random
 RED = "\033[91m"
 RESET = "\033[0m"
 
-battleships_player_1 = {"BB1":{1:[False, False, False,], 2:[False, False, False,], 3:[False, False, False,], 4:[False, False, False,]},
-                        "CA1": {1:[False, False, False,], 2:[False, False, False,], 3:[False, False, False,]},
-                        "CA2": {1:[False, False, False,], 2:[False, False, False,], 3:[False, False, False,]},
-                        "SS1": {1:[False, False, False,], 2:[False, False, False,]},
-                        "SS2": {1:[False, False, False,], 2:[False, False, False,]},
-                        "SS3": {1:[False, False, False,], 2:[False, False, False,]},
-                        "PB1": {1:[False, False, False,],},
-                        "PB2": {1:[False, False, False,],},
-                        "PB3": {1:[False, False, False,],},
-                        "PB4": {1:[False, False, False,],},
-                        }
+# Format: "ship name" : number of decks
+ships_info = {
+    "BB1": 4,
+    "CA1": 3,
+    "CA2": 3,
+    "SS1": 2,
+    "SS2": 2,
+    "SS3": 2,
+    "PB1": 1,
+    "PB2": 1,
+    "PB3": 1,
+    "PB4": 1,
+}
 
-battleships_player_2 = {"BB1":{1:[False, False, False,], 2:[False, False, False,], 3:[False, False, False,], 4:[False, False, False,]},
-                        "CA1": {1:[False, False, False,], 2:[False, False, False,], 3:[False, False, False,]},
-                        "CA2": {1:[False, False, False,], 2:[False, False, False,], 3:[False, False, False,]},
-                        "SS1": {1:[False, False, False,], 2:[False, False, False,]},
-                        "SS2": {1:[False, False, False,], 2:[False, False, False,]},
-                        "SS3": {1:[False, False, False,], 2:[False, False, False,]},
-                        "PB1": {1:[False, False, False,],},
-                        "PB2": {1:[False, False, False,],},
-                        "PB3": {1:[False, False, False,],},
-                        "PB4": {1:[False, False, False,],},
-                        }
+# Generate battleships_player_1
+battleships_player_1 = {}
+for ship_name, decks in ships_info.items():
+    battleships_player_1[ship_name] = {i: [False, False, False] for i in range(1, decks + 1)}
 
-player_1_ship_list = [["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                    ]
+# Generate battleships_player_2
+battleships_player_2 = {}
+for ship_name, decks in ships_info.items():
+    battleships_player_2[ship_name] = {i: [False, False, False] for i in range(1, decks + 1)}
 
-player_2_ship_list = [["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                      ["~", "~", "~", "~", "~", "~", "~", "~", "~", "~"],
-                    ]
+# Generating player fields
+player_1_ship_list = [["~" for _ in range(10)] for _ in range(10)]
+player_2_ship_list = [["~" for _ in range(10)] for _ in range(10)]
 
+# Lists of coordinates for the field names on the grid
 grid_numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 grid_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-
 
 
 def get_ship_visual(ship_properties: dict, ship_decks: int) -> str:
@@ -359,30 +339,40 @@ def drow_full_display(d1: dict, l1: list, d2: dict, l2: list) -> None:
     """
     TODO
     """
+    letters = "abcdefghij"
+    
+    ship_info = {
+        0: ("BB", ["BB1"]),
+        2: ("CA", ["CA1", "CA2"]),
+        4: ("SS", ["SS1", "SS2", "SS3"]),
+        6: ("PB", ["PB1", "PB2", "PB3", "PB4"])
+    }
 
     print(
-        f"""
-       Your field                                             Opponent's field                     
-   0 1 2 3 4 5 6 7 8 9                                        0 1 2 3 4 5 6 7 8 9
- +---------------------+                                    +---------------------+  
-a| {l1[0][0]} {l1[0][1]} {l1[0][2]} {l1[0][3]} {l1[0][4]} {l1[0][5]} {l1[0][6]} {l1[0][7]} {l1[0][8]} {l1[0][9]} |  BB - {r(d1["BB1"])}                        a| {l2[0][0]} {l2[0][1]} {l2[0][2]} {l2[0][3]} {l2[0][4]} {l2[0][5]} {l2[0][6]} {l2[0][7]} {l2[0][8]} {l2[0][9]} |  BB - {r(d2["BB1"])}
-b| {l1[1][0]} {l1[1][1]} {l1[1][2]} {l1[1][3]} {l1[1][4]} {l1[1][5]} {l1[1][6]} {l1[1][7]} {l1[1][8]} {l1[1][9]} |                                   b| {l2[1][0]} {l2[1][1]} {l2[1][2]} {l2[1][3]} {l2[1][4]} {l2[1][5]} {l2[1][6]} {l2[1][7]} {l2[1][8]} {l2[1][9]} |  
-c| {l1[2][0]} {l1[2][1]} {l1[2][2]} {l1[2][3]} {l1[2][4]} {l1[2][5]} {l1[2][6]} {l1[2][7]} {l1[2][8]} {l1[2][9]} |  CA - {r(d1["CA1"])} - {r(d1["CA2"])}                   c| {l2[2][0]} {l2[2][1]} {l2[2][2]} {l2[2][3]} {l2[2][4]} {l2[2][5]} {l2[2][6]} {l2[2][7]} {l2[2][8]} {l2[2][9]} |  CA - {r(d2["CA1"])} - {r(d2["CA2"])}
-d| {l1[3][0]} {l1[3][1]} {l1[3][2]} {l1[3][3]} {l1[3][4]} {l1[3][5]} {l1[3][6]} {l1[3][7]} {l1[3][8]} {l1[3][9]} |                                   d| {l2[3][0]} {l2[3][1]} {l2[3][2]} {l2[3][3]} {l2[3][4]} {l2[3][5]} {l2[3][6]} {l2[3][7]} {l2[3][8]} {l2[3][9]} |
-e| {l1[4][0]} {l1[4][1]} {l1[4][2]} {l1[4][3]} {l1[4][4]} {l1[4][5]} {l1[4][6]} {l1[4][7]} {l1[4][8]} {l1[4][9]} |  SS - {r(d1["SS1"])} - {r(d1["SS2"])} - {r(d1["SS3"])}                e| {l2[4][0]} {l2[4][1]} {l2[4][2]} {l2[4][3]} {l2[4][4]} {l2[4][5]} {l2[4][6]} {l2[4][7]} {l2[4][8]} {l2[4][9]} |  SS - {r(d2["SS1"])} - {r(d2["SS2"])} - {r(d2["SS3"])}
-f| {l1[5][0]} {l1[5][1]} {l1[5][2]} {l1[5][3]} {l1[5][4]} {l1[5][5]} {l1[5][6]} {l1[5][7]} {l1[5][8]} {l1[5][9]} |                                   f| {l2[5][0]} {l2[5][1]} {l2[5][2]} {l2[5][3]} {l2[5][4]} {l2[5][5]} {l2[5][6]} {l2[5][7]} {l2[5][8]} {l2[5][9]} |
-g| {l1[6][0]} {l1[6][1]} {l1[6][2]} {l1[6][3]} {l1[6][4]} {l1[6][5]} {l1[6][6]} {l1[6][7]} {l1[6][8]} {l1[6][9]} |  PB - {r(d1["PB1"])} - {r(d1["PB2"])} - {r(d1["PB3"])} - {r(d1["PB4"])}               g| {l2[6][0]} {l2[6][1]} {l2[6][2]} {l2[6][3]} {l2[6][4]} {l2[6][5]} {l2[6][6]} {l2[6][7]} {l2[6][8]} {l2[6][9]} |  PB - {r(d2["PB1"])} - {r(d2["PB2"])} - {r(d2["PB3"])} - {r(d2["PB4"])}
-h| {l1[7][0]} {l1[7][1]} {l1[7][2]} {l1[7][3]} {l1[7][4]} {l1[7][5]} {l1[7][6]} {l1[7][7]} {l1[7][8]} {l1[7][9]} |                                   h| {l2[7][0]} {l2[7][1]} {l2[7][2]} {l2[7][3]} {l2[7][4]} {l2[7][5]} {l2[7][6]} {l2[7][7]} {l2[7][8]} {l2[7][9]} |
-i| {l1[8][0]} {l1[8][1]} {l1[8][2]} {l1[8][3]} {l1[8][4]} {l1[8][5]} {l1[8][6]} {l1[8][7]} {l1[8][8]} {l1[8][9]} |                                   i| {l2[8][0]} {l2[8][1]} {l2[8][2]} {l2[8][3]} {l2[8][4]} {l2[8][5]} {l2[8][6]} {l2[8][7]} {l2[8][8]} {l2[8][9]} |
-j| {l1[9][0]} {l1[9][1]} {l1[9][2]} {l1[9][3]} {l1[9][4]} {l1[9][5]} {l1[9][6]} {l1[9][7]} {l1[9][8]} {l1[9][9]} |                                   j| {l2[9][0]} {l2[9][1]} {l2[9][2]} {l2[9][3]} {l2[9][4]} {l2[9][5]} {l2[9][6]} {l2[9][7]} {l2[9][8]} {l2[9][9]} |
- +---------------------+                                    +---------------------+
-                                    Your turn!
-"""
+        "    Your field                                                   Opponent's field\n"
+        "   0 1 2 3 4 5 6 7 8 9                                          0 1 2 3 4 5 6 7 8 9"
     )
+    print(" +---------------------+                                      +---------------------+")
+
+    for i in range(10):
+        left_row = f"{letters[i]}| " + " ".join(l1[i]) + " |"
+        right_row = f"{letters[i]}| " + " ".join(l2[i]) + " |"
+
+        # Якщо треба додати інформацію про кораблі
+        if i in ship_info:
+            ship_name, keys = ship_info[i]
+            left_ships = " - ".join(r(d1[k]) for k in keys)
+            right_ships = " - ".join(r(d2[k]) for k in keys)
+            # важливо: менше місця між лівим і правим, щоб лівий бік не зсувався
+            print(f"{left_row}  {ship_name} - {left_ships:<30}{right_row}  {ship_name} - {right_ships}")
+        else:
+            print(f"{left_row}                                     {right_row}")
+
+    print(" +---------------------+                                      +---------------------+")
+    print("                                    Your turn!")
 
 
-
-def drow_players_display(d1: dict, l1: list) -> None:
+def draw_players_display(d1: dict, l1: list) -> None:
     """
     Displays the player's field during the ship placement phase.
 
@@ -401,24 +391,29 @@ def drow_players_display(d1: dict, l1: list) -> None:
     Returns:
         None
     """ 
-    print(
-        f"""
+    grid_letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+    ship_info = {
+        0: ("BB", ["BB1"]),
+        2: ("CA", ["CA1", "CA2"]),
+        4: ("SS", ["SS1", "SS2", "SS3"]),
+        6: ("PB", ["PB1", "PB2", "PB3", "PB4"]),
+    }
+
+    print("""
        Your field                
    0 1 2 3 4 5 6 7 8 9
  +---------------------+ 
-a| {l1[0][0]} {l1[0][1]} {l1[0][2]} {l1[0][3]} {l1[0][4]} {l1[0][5]} {l1[0][6]} {l1[0][7]} {l1[0][8]} {l1[0][9]} |  BB - {r(d1["BB1"])}
-b| {l1[1][0]} {l1[1][1]} {l1[1][2]} {l1[1][3]} {l1[1][4]} {l1[1][5]} {l1[1][6]} {l1[1][7]} {l1[1][8]} {l1[1][9]} |
-c| {l1[2][0]} {l1[2][1]} {l1[2][2]} {l1[2][3]} {l1[2][4]} {l1[2][5]} {l1[2][6]} {l1[2][7]} {l1[2][8]} {l1[2][9]} |  CA - {r(d1["CA1"])} - {r(d1["CA2"])}
-d| {l1[3][0]} {l1[3][1]} {l1[3][2]} {l1[3][3]} {l1[3][4]} {l1[3][5]} {l1[3][6]} {l1[3][7]} {l1[3][8]} {l1[3][9]} |
-e| {l1[4][0]} {l1[4][1]} {l1[4][2]} {l1[4][3]} {l1[4][4]} {l1[4][5]} {l1[4][6]} {l1[4][7]} {l1[4][8]} {l1[4][9]} |  SS - {r(d1["SS1"])} - {r(d1["SS2"])} - {r(d1["SS3"])}
-f| {l1[5][0]} {l1[5][1]} {l1[5][2]} {l1[5][3]} {l1[5][4]} {l1[5][5]} {l1[5][6]} {l1[5][7]} {l1[5][8]} {l1[5][9]} |
-g| {l1[6][0]} {l1[6][1]} {l1[6][2]} {l1[6][3]} {l1[6][4]} {l1[6][5]} {l1[6][6]} {l1[6][7]} {l1[6][8]} {l1[6][9]} |  PB - {r(d1["PB1"])} - {r(d1["PB2"])} - {r(d1["PB3"])} - {r(d1["PB4"])}
-h| {l1[7][0]} {l1[7][1]} {l1[7][2]} {l1[7][3]} {l1[7][4]} {l1[7][5]} {l1[7][6]} {l1[7][7]} {l1[7][8]} {l1[7][9]} |
-i| {l1[8][0]} {l1[8][1]} {l1[8][2]} {l1[8][3]} {l1[8][4]} {l1[8][5]} {l1[8][6]} {l1[8][7]} {l1[8][8]} {l1[8][9]} |
-j| {l1[9][0]} {l1[9][1]} {l1[9][2]} {l1[9][3]} {l1[9][4]} {l1[9][5]} {l1[9][6]} {l1[9][7]} {l1[9][8]} {l1[9][9]} |
- +---------------------+
-"""
-    )
+""", end="")
+
+    for idx, row in enumerate(l1):
+        line = f"{grid_letters[idx]}| " + " ".join(row) + " |"
+        if idx in ship_info:
+            ship_name, keys = ship_info[idx]
+            ship_status = " - ".join(r(d1[k]) for k in keys)
+            line += f"  {ship_name} - {ship_status}"
+        print(line)
+
+    print(" +---------------------+")
 
 
 def get_auto_coordinates(orientation: str, coord: str, ship_len: int) -> list:
@@ -567,7 +562,7 @@ def add_new_battleship(
                         )
 
                     # Draw the updated field
-                    drow_players_display(
+                    draw_players_display(
                         battleships_player_1,
                         player_1_ship_list
                         )
@@ -640,7 +635,7 @@ def auto_place_ships(ship_list: list, battleships: dict) -> None:
     # Convert ship dictionary to field list for visualization
     player_1_ship_list = convert_ship_dict_to_field_list(battleships, ship_list)
 
-    drow_players_display(battleships, player_1_ship_list) # #############################################
+    draw_players_display(battleships, player_1_ship_list) # #############################################
 
 
 def main():
